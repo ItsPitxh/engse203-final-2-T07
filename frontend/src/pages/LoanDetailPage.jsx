@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getLoan, updateLoanStatus, deleteLoan } from '../services/loanService.js';
 import { useAuth } from '../hooks/useAuth.js';
 import LoadingState from '../components/LoadingState.jsx';
 import ErrorState from '../components/ErrorState.jsx';
-
-const ALL_STATUSES = ['requested', 'borrowed', 'returned', 'overdue'];
+import StatusBadge from '../components/StatusBadge.jsx';
+import { STATUS_ORDER, statusLabel } from '../utils/loanStatus.js';
 
 export default function LoanDetailPage() {
   const { id } = useParams();
@@ -33,35 +33,53 @@ export default function LoanDetailPage() {
     catch (err) { alert(err.message); }
   }
 
-  if (loading) return <LoadingState />;
-  if (error) {
+  let body;
+  if (loading) {
+    body = <LoadingState />;
+  } else if (error) {
     const notFound = error.status === 404 || /ไม่พบ/.test(error.message || '');
-    return <ErrorState message={notFound ? 'ไม่พบรายการ' : error.message} />;
+    body = <ErrorState message={notFound ? 'ไม่พบรายการ' : error.message} />;
+  } else if (!loan) {
+    body = <p className="subtle-empty">ไม่พบรายการ</p>;
+  } else {
+    body = (
+      <section className="panel detail-card">
+        <dl>
+          <div><dt>ผู้ยืม</dt><dd>{loan.borrowerName}</dd></div>
+          <div><dt>อุปกรณ์</dt><dd>{loan.equipmentName} ({loan.equipmentLocation})</dd></div>
+          <div><dt>จำนวน</dt><dd>{loan.quantity}</dd></div>
+          <div><dt>วันยืม</dt><dd>{loan.borrowDate}</dd></div>
+          <div><dt>วันกำหนดคืน</dt><dd>{loan.returnDate}</dd></div>
+          <div><dt>วัตถุประสงค์</dt><dd>{loan.purpose}</dd></div>
+          <div><dt>สถานะ</dt><dd><StatusBadge status={loan.status} /></dd></div>
+        </dl>
+        {isStaff && (
+          <div className="actions">
+            {STATUS_ORDER.filter(s => s !== loan.status).map(s => (
+              <button key={s} type="button" className="button secondary"
+                onClick={() => onStatusChange(s)}>
+                เปลี่ยนเป็น {statusLabel(s)}
+              </button>
+            ))}
+            <button type="button" className="button danger" onClick={onDelete}>
+              ลบคำขอยืม
+            </button>
+          </div>
+        )}
+      </section>
+    );
   }
-  if (!loan) return <p>ไม่พบรายการ</p>;
 
   return (
-    <main>
-      <h1>คำขอยืม {loan.id}</h1>
-      <dl>
-        <dt>ผู้ยืม</dt><dd>{loan.borrowerName}</dd>
-        <dt>อุปกรณ์</dt><dd>{loan.equipmentName} ({loan.equipmentLocation})</dd>
-        <dt>จำนวน</dt><dd>{loan.quantity}</dd>
-        <dt>วันยืม</dt><dd>{loan.borrowDate}</dd>
-        <dt>วันกำหนดคืน</dt><dd>{loan.returnDate}</dd>
-        <dt>วัตถุประสงค์</dt><dd>{loan.purpose}</dd>
-        <dt>สถานะ</dt><dd>{loan.status}</dd>
-      </dl>
-
-      {isStaff && (
-        <section className="staff-actions">
-          <h2>การจัดการ (เจ้าหน้าที่)</h2>
-          {ALL_STATUSES.filter(s => s !== loan.status).map(s => (
-            <button key={s} onClick={() => onStatusChange(s)}>เปลี่ยนเป็น {s}</button>
-          ))}
-          <button onClick={onDelete} className="danger">ลบคำขอยืม</button>
-        </section>
-      )}
-    </main>
+    <>
+      <div className="page-heading">
+        <div>
+          <p className="eyebrow dark">LOAN · DETAIL</p>
+          <h1>คำขอยืม {id}</h1>
+        </div>
+        <Link className="button secondary inline" to="/">← กลับไปรายการ</Link>
+      </div>
+      {body}
+    </>
   );
 }

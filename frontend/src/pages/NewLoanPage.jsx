@@ -40,47 +40,58 @@ export default function NewLoanPage() {
   const selectedEq = equipment.find(e => e.id === form.equipmentId);
 
   return (
-    <main>
-      <h1>ขอยืมอุปกรณ์</h1>
-      <form onSubmit={onSubmit}>
-        <label>ชื่อผู้ยืม
-          <input value={form.borrowerName}
-            onChange={e => set('borrowerName', e.target.value)} required />
-        </label>
-        <label>อุปกรณ์
-          <select value={form.equipmentId}
-            onChange={e => set('equipmentId', e.target.value)} required>
-            <option value="">-- เลือก --</option>
-            {equipment.map(eq => (
-              <option key={eq.id} value={eq.id} disabled={eq.availableQty <= 0}>
-                {eq.name} (เหลือ {eq.availableQty}/{eq.totalQty})
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>จำนวน
-          <input type="number" min="1" max={selectedEq?.availableQty ?? 10}
-            value={form.quantity} onChange={e => set('quantity', e.target.value)} required />
-        </label>
-        <label>วันยืม
-          <input type="date" value={form.borrowDate}
-            onChange={e => set('borrowDate', e.target.value)} required />
-        </label>
-        <label>วันคืน
-          <input type="date" value={form.returnDate}
-            onChange={e => set('returnDate', e.target.value)} required />
-        </label>
-        <label>วัตถุประสงค์
-          <textarea value={form.purpose} rows="3"
-            onChange={e => set('purpose', e.target.value)} required />
-        </label>
-        {errors.length > 0 && (
-          <ul role="alert" className="errors">
-            {errors.map((er, i) => <li key={i}>{er}</li>)}
-          </ul>
-        )}
-        <button disabled={submitting}>{submitting ? 'กำลังส่ง…' : 'ส่งคำขอยืม'}</button>
-      </form>
-    </main>
+    <>
+      <div className="page-heading">
+        <div>
+          <p className="eyebrow dark">LOANS · NEW</p>
+          <h1>ขอยืมอุปกรณ์</h1>
+          <p>ยืมได้ไม่เกิน 14 วัน และไม่เกินจำนวนคงเหลือ</p>
+        </div>
+      </div>
+
+      <section className="panel form-panel">
+        <form onSubmit={onSubmit} noValidate>
+          <label className="field">ชื่อผู้ยืม
+            <input value={form.borrowerName}
+              onChange={e => set('borrowerName', e.target.value)} />
+          </label>
+          <label className="field">อุปกรณ์
+            <select value={form.equipmentId}
+              onChange={e => set('equipmentId', e.target.value)}>
+              <option value="">-- เลือก --</option>
+              {equipment.map(eq => (
+                <option key={eq.id} value={eq.id} disabled={eq.availableQty <= 0}>
+                  {eq.name} (เหลือ {eq.availableQty}/{eq.totalQty})
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">จำนวน
+            <input type="number" min="1" max={selectedEq?.availableQty ?? 10}
+              value={form.quantity} onChange={e => set('quantity', e.target.value)} />
+          </label>
+          <label className="field">วันยืม
+            <input type="date" value={form.borrowDate}
+              onChange={e => set('borrowDate', e.target.value)} />
+          </label>
+          <label className="field">วันคืน
+            <input type="date" value={form.returnDate}
+              onChange={e => set('returnDate', e.target.value)} />
+          </label>
+          <label className="field">วัตถุประสงค์
+            <textarea rows="3" value={form.purpose}
+              onChange={e => set('purpose', e.target.value)} />
+          </label>
+          {errors.length > 0 && (
+            <ul role="alert" className="error">
+              {errors.map((er, i) => <li key={i}>{er}</li>)}
+            </ul>
+          )}
+          <button className="button primary" disabled={submitting}>
+            {submitting ? 'กำลังส่ง…' : 'ส่งคำขอยืม'}
+          </button>
+        </form>
+      </section>
+    </>
   );
 }
