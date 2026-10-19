@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { listLoans } from '../services/loanService.js';
 import { summarizeByStatus } from '../utils/loanSummary.js';
 import LoadingState from '../components/LoadingState.jsx';
 import ErrorState from '../components/ErrorState.jsx';
+import SummaryPanel from '../components/SummaryPanel.jsx';
 
 export default function DashboardPage() {
   const [summary, setSummary] = useState(null);
@@ -14,19 +16,20 @@ export default function DashboardPage() {
       .catch(setError);
   }, []);
 
-  if (error) return <ErrorState message={error.message} />;
-  if (!summary) return <LoadingState />;
-
   return (
-    <main>
-      <h1>สรุปภาพรวม</h1>
-      <div className="cards">
-        {Object.entries(summary).map(([status, count]) => (
-          <div key={status} className={`card status-${status}`}>
-            <h2>{status}</h2><p className="count">{count}</p>
-          </div>
-        ))}
+    <>
+      <div className="page-heading">
+        <div>
+          <p className="eyebrow dark">DASHBOARD · SUMMARY</p>
+          <h1>Dashboard</h1>
+          <p>สรุปจำนวนคำขอยืมแยกตามสถานะ</p>
+        </div>
+        <Link className="button secondary inline" to="/">ดูรายการทั้งหมด</Link>
       </div>
-    </main>
+
+      {error && <ErrorState message={error.message} />}
+      {!error && !summary && <LoadingState />}
+      {summary && <SummaryPanel summary={summary} />}
+    </>
   );
 }

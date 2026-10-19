@@ -8,7 +8,9 @@ export function useAuth() {
   function logout() {
     auth.clearToken();
     localStorage.removeItem('user');
-    window.location.href = '/login';
+    // main.jsx ใช้ HashRouter จึงเปลี่ยน hash แล้วรีโหลด
+    window.location.hash = '#/login';
+    window.location.reload();
   }
   return { token, user, isStaff, logout };
 }

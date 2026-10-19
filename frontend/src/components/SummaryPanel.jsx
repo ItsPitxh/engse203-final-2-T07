@@ -1,17 +1,17 @@
-const items = [
-  ['total', 'ทั้งหมด'],
-  ['pending', 'รอดำเนินการ'],
-  ['inProgress', 'กำลังดำเนินการ'],
-  ['completed', 'เสร็จสิ้น'],
-];
+import { STATUS_ORDER, statusLabel } from '../utils/loanStatus.js';
 
 function SummaryPanel({ summary }) {
+  const total = STATUS_ORDER.reduce((n, s) => n + (summary[s] ?? 0), 0);
+  const items = [
+    ['ทั้งหมด', total],
+    ...STATUS_ORDER.map(s => [statusLabel(s), summary[s] ?? 0]),
+  ];
   return (
-    <section className="summary-grid" aria-label="สรุปคำร้อง">
-      {items.map(([key, label]) => (
-        <article className="summary-card" key={key}>
+    <section className="summary-grid" aria-label="สรุปคำขอยืม">
+      {items.map(([label, value]) => (
+        <article className="summary-card" key={label}>
           <span>{label}</span>
-          <strong>{summary[key]}</strong>
+          <strong>{value}</strong>
         </article>
       ))}
     </section>

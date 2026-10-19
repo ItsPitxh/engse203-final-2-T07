@@ -1,17 +1,12 @@
-const filters = [
-  ['all', 'ทั้งหมด'],
-  ['pending', 'รอดำเนินการ'],
-  ['in-progress', 'กำลังดำเนินการ'],
-  ['completed', 'เสร็จสิ้น'],
-];
+import { STATUS_FILTERS } from '../utils/loanStatus.js';
 
 function FilterBar({ value, onFilterChange }) {
   return (
-    <div className="filter-bar" role="group" aria-label="กรองสถานะคำร้อง">
-      {filters.map(([filterValue, label]) => (
+    <div className="filter-bar" role="group" aria-label="กรองสถานะคำขอยืม">
+      {STATUS_FILTERS.map(({ value: filterValue, label }) => (
         <button
           className={value === filterValue ? 'filter-active' : 'filter-button'}
-          key={filterValue}
+          key={filterValue || 'all'}
           type="button"
           onClick={() => onFilterChange(filterValue)}
           aria-pressed={value === filterValue}

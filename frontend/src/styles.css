@@ -65,3 +65,20 @@ input[aria-invalid="true"],select[aria-invalid="true"],textarea[aria-invalid="tr
 @media (min-width:42rem) { .header-inner,.page-heading { flex-direction:row; align-items:center; } .header-inner { justify-content:space-between; } .request-card { flex-direction:row; justify-content:space-between; } }
 @media (min-width:52rem) { .summary-grid { grid-template-columns:repeat(4,minmax(0,1fr)); } .section-heading { flex-direction:row; justify-content:space-between; align-items:center; } }
 @media (prefers-reduced-motion:reduce) { .spinner { animation:none; } }
+
+/* ===== T07 additions ===== */
+.badge.requested { color:#7a4700; background:#fff0cc; }
+.badge.borrowed  { color:#075e68; background:#dff6f5; }
+.badge.returned  { color:#176b45; background:#dff4e8; }
+.badge.overdue   { color:#b42318; background:#feeceb; }
+button.nav-link { background:transparent; cursor:pointer; }
+.nav-link:hover { background:#ffffff22; }
+.nav-link.active:hover { background:white; }
+.nav-user { align-self:center; padding-inline:.4rem; color:white; font-weight:700; }
+.request-card h3 a { color:#0b58a5; }
+.page-heading .button { align-self:flex-start; }
+.actions { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:1rem; }
+.form-panel form { display:grid; gap:.25rem; }
+.form-panel .button { justify-self:start; }
+ul.error { margin:0 0 .5rem; padding:.7rem .85rem .7rem 1.8rem; background:#feeceb; border-radius:.6rem; min-height:0; }
+@media (min-width:52rem) { .summary-grid { grid-template-columns:repeat(5,minmax(0,1fr)); } }
