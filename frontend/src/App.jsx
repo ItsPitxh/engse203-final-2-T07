@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route, Link } from 'react-router-dom';
 import LoansListPage from './pages/LoansListPage.jsx';
 import LoanDetailPage from './pages/LoanDetailPage.jsx';
 import NewLoanPage from './pages/NewLoanPage.jsx';
@@ -25,7 +25,7 @@ function Nav() {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <>
       <Nav />
       <Routes>
         <Route path="/" element={<LoansListPage />} />
@@ -34,6 +34,6 @@ export default function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/login" element={<LoginPage />} />
       </Routes>
-    </BrowserRouter>
+    </>
   );
 }
