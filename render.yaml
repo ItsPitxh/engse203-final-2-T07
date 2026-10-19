@@ -1,11 +1,11 @@
-# render.yaml — Render Blueprint
+# render.yaml — Render Blueprint ของทีม T07
+# โปรเจกต์อยู่ที่ root ของ repo แล้ว · ไม่ต้องตั้ง rootDir
 services:
   - type: web
-    name: campus-service
+    name: engse203-final-2-t07
     runtime: node
     plan: free
     region: singapore
-    rootDir: labs/week-13/source
     buildCommand: npm install && npm run build
     startCommand: npm start
     healthCheckPath: /api/health
@@ -14,11 +14,11 @@ services:
         value: production
       - key: NODE_VERSION
         value: "22"
-      # ⭐ Challenge · ให้ Render สุ่ม JWT_SECRET ใหม่ให้โปรเจกต์นี้
+      # Render สุ่ม JWT_SECRET ใหม่ให้ · ไม่อยู่ใน git
       - key: JWT_SECRET
         generateValue: true
-      # ⭐⭐ Challenge Turso — sync: false = Render ถามค่าตอนสร้าง · ไม่ commit ค่า
-      # - key: TURSO_DATABASE_URL
-      #   sync: false
-      # - key: TURSO_AUTH_TOKEN
-      #   sync: false
+      # บัญชีเจ้าหน้าที่ production (ROLES D3) · Render ถามค่าตอนสร้าง · ไม่ commit ค่าจริง
+      - key: STAFF_EMAIL
+        sync: false
+      - key: STAFF_PASSWORD
+        sync: false
