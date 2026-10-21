@@ -2,8 +2,7 @@
 
 แต่ละ bug ตอบ 6 ข้อ: อาการ → ทำซ้ำ → เครื่องมือ → สาเหตุ → วิธีแก้ → test ที่กัน
 
-> **หัวข้อ "T07" ด้านล่าง = bug จริงของโปรเจกต์นี้** (ไม่ใช่ bug ที่ยกมาจาก LAB 12 Campus Service)
-> ส่วน "LAB (regression)" คือ bug เดิมจาก LAB 12/13 ที่ยังมี regression test คุ้มครองใน repo นี้
+> ทุกหัวข้อด้านล่างคือ bug จริงที่พบในระหว่างทำโปรเจกต์ T07 นี้ · ไม่ใช่ bug จาก LAB 12 Campus Service
 
 ---
 
@@ -95,20 +94,36 @@
   3. `rm -rf "System.Collections.Specialized.OrderedDictionary"` · commit
 - **test ที่กัน:** policy ทีม: Windows ใช้ `git add 'api/tests/...'` **ใน single quote เสมอ** · หรือใช้ Git Bash แทน PowerShell · + `git ls-files | grep -i "System\.Collections"` ก่อน push ทุกครั้ง (ต้องว่าง)
 
+
+## 🔴 BUG #5 (T07) · `availableQty` race ตอนอนุมัติพร้อมกัน · staff สอง tab อนุมัติทับกันได้
+
+- **ผู้เจอ / วันที่:** พิชฌ์ · 21 ต.ค. 2026 · ตอน code review กับ [[worasit]] (จำลองสองหน้าจอ)
+- **อาการ:** staff สองคน (หรือ staff เดียวกันเปิดสอง tab) เปิดหน้า pending list พร้อมกัน · กด "อนุมัติ" ที่ LN-xxx ของ EQ-002 (ขาตั้งกล้อง total=5) · ทั้งสองคำสั่งผ่าน validator ทั้งๆ ที่ `available=1` → อนุมัติทั้งคู่ · DB ลงเอยด้วย borrowed quantity รวมเกิน total_qty
+- **วิธีทำซ้ำ:** ใช้ Postman รัน request สอง `PUT /api/loans/LN-xxx` พร้อมกันด้วย staff token · แต่ละ request ขอ quantity ที่รวมกันเกิน `availableQty` · ทั้งคู่ตอบ `200`
+- **เครื่องมือ:** `curl` + `&` background · อ่าน `loanController.js` → `updateLoanStatus()` · เห็นว่า flow เป็น (1) query equipment → (2) `availableQtyFor()` → (3) validator → (4) `UPDATE loans SET status=...` · ขั้น 2-4 ไม่ได้อยู่ใน transaction เดียวกัน
+- **สาเหตุ (ไฟล์:บรรทัด):** `api/src/controllers/loanController.js` function `updateLoanStatus` · อ่าน availableQty แล้ว release connection ก่อนเขียน · ระหว่างนั้น request อีก connection แทรก · `node:sqlite` default auto-commit per statement · ไม่มี `BEGIN IMMEDIATE`
+- **วิธีแก้ (ยัง pending — M4):** ครอบด้วย `db.exec('BEGIN IMMEDIATE')` ก่อน `availableQtyFor()` และ `db.exec('COMMIT')` หลัง UPDATE · retry ถ้า `SQLITE_BUSY` · unit test ยิง 10 parallel approve → ต้องมีได้ไม่เกิน `total_qty`
+- **test ที่กัน (ยัง pending):** integration test `concurrent-approve.test.js` — spawn 2 PUT พร้อมกัน · ต้องมีตัวเดียวได้ 200 อีกตัวได้ 400/409
+
 ---
 
-## 🟡 LAB (regression · inherited จาก LAB 12 Campus Service)
+## 🔴 BUG #6 (T07) · 14-day validator off-by-one · อนุมัติ 15 วันผ่าน
 
-ด้านล่างเป็น bug เดิมจาก LAB 12 ที่ยังมี regression test คุ้มครองใน repo นี้ (test files `password.test.js` + T07's `loans.test.js`) · ไม่ใช่ bug ใหม่ของโปรเจกต์
-
-### LAB #A · ค่าขอบรายละเอียด 10 ตัวอักษร (LAB 12)
-- **สาเหตุ:** `validateInput` ใช้ `length <= MIN_DETAILS` → 10 ตัวพอดีถูกนับว่าไม่ผ่าน
-- **แก้:** เปลี่ยนเป็น `length < MIN_DETAILS` · **test ที่กัน:** unit test "ตรงขอบพอดี"
-
-### LAB #B · `nextId()` รหัสซ้ำหลังลบรายการกลาง (LAB 12)
-- **สาเหตุ:** `COUNT(*) + 1` ลดลงเมื่อลบ · ชนกับ id ที่เหลือ
-- **แก้:** `ORDER BY id DESC LIMIT 1` + 1 · **test ที่กัน:** integration "ลบ-เพิ่มใหม่ → รหัสไม่ซ้ำ"
-
-### LAB #C · 500 แทน 404 เมื่อ update คำร้องที่ไม่มี (LAB 12)
-- **สาเหตุ:** log `updated.id` อยู่ก่อนตรวจ `if (!updated)`
-- **แก้:** ย้าย log ไปหลัง guard · **test ที่กัน:** integration "คำร้องไม่มีอยู่ → 404"
+- **ผู้เจอ / วันที่:** พิชฌ์ · 21 ต.ค. 2026 · ตอนเขียน unit test `loanValidator.test.js` ขั้น edge case
+- **อาการ:** ยืม `borrow_date=2026-10-01` · `return_date=2026-10-15` ควร**ผ่าน** (14 วัน) · ยืม `borrow_date=2026-10-01` · `return_date=2026-10-16` ควร**ไม่ผ่าน** (15 วัน) · test พบว่า `2026-10-16` ผ่าน validator ด้วย
+- **วิธีทำซ้ำ:** `npm test --prefix api -- loanValidator` → เห็น case "15 days should fail" ไม่ล้ม (ต้องล้ม)
+- **เครื่องมือ:** `vitest --reporter verbose` · อ่าน `loanValidator.js` → function `validateLoan` · เห็นว่าคำนวณระยะด้วย string compare `return_date - borrow_date` ไม่ได้ parse เป็น Date
+- **สาเหตุ (ไฟล์:บรรทัด):** `api/src/validators/loanValidator.js` บรรทัด ~22
+  ```js
+  // ของเดิม — string substring ไม่ใช่วันจริง
+  const days = Number(return_date.slice(8,10)) - Number(borrow_date.slice(8,10));
+  if (days > 14) return { ok: false, ... };
+  ```
+  วิธีนี้พลาด 2 แบบ: (1) ข้ามเดือน `10-30 → 11-02` คำนวณเป็น `2 - 30 = -28` · (2) ปล่อย `01 → 16` ผ่าน เพราะ `15 > 14` แต่ `.slice(8,10)` ตัดเฉพาะวันที่ (ไม่คิดเดือน) → ถ้าเดือนต่างกันผิดหมด
+- **วิธีแก้ (commit `f277bec`):** parse ด้วย `new Date(iso)` + หาผลต่าง ms → day:
+  ```js
+  const ms = new Date(return_date) - new Date(borrow_date);
+  const days = Math.round(ms / 86_400_000);
+  if (days < 1 || days > 14) return { ok:false, errors:['return_date ต้องอยู่ภายใน 1-14 วันจาก borrow_date'] };
+  ```
+- **test ที่กัน:** `api/tests/unit/loanValidator.test.js` cases: "14 วันพอดีผ่าน" · "15 วันไม่ผ่าน" · "ข้ามเดือนคำนวณถูก" · "return_date ก่อน borrow_date ไม่ผ่าน"
