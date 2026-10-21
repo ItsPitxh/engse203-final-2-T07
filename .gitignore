@@ -15,3 +15,13 @@ api/data/test.db
 
 .DS_Store
 *.log
+
+# T07 — SQLite databases (ไม่ commit; สร้างจาก schema.sql + seed อัตโนมัติ)
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+api/data/*.db
+
+# macOS FUSE swap files (เกิดตอน device bridge แก้ไฟล์)
+.fuse_hidden*

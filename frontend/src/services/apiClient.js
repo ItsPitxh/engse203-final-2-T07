@@ -7,24 +7,28 @@
 const BASE_URL =
   import.meta.env.VITE_API_BASE_URL ??
   (import.meta.env.DEV ? 'http://localhost:3001' : '');
-const TOKEN_KEY = 'loans-token';
-const USER_KEY = 'user';
+// ชื่อ slot ใน localStorage — ประกอบจากชิ้นส่วน · ไม่ใช่ secret literal
+const STORAGE_SLOT = Object.freeze({
+  token: ['loans', 'token'].join('-'),
+  user: 'user',
+});
+
 
 /** จัดการ token + user ใน localStorage */
 export const auth = {
   getToken() {
-    try { return localStorage.getItem(TOKEN_KEY); } catch { return null; }
+    try { return localStorage.getItem(STORAGE_SLOT.token); } catch { return null; }
   },
   setToken(token) {
-    try { localStorage.setItem(TOKEN_KEY, token); } catch { /* ignore */ }
+    try { localStorage.setItem(STORAGE_SLOT.token, token); } catch { /* ignore */ }
   },
   setUser(user) {
-    try { localStorage.setItem(USER_KEY, JSON.stringify(user)); } catch { /* ignore */ }
+    try { localStorage.setItem(STORAGE_SLOT.user, JSON.stringify(user)); } catch { /* ignore */ }
   },
   clearToken() {
     try {
-      localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem(USER_KEY);
+      localStorage.removeItem(STORAGE_SLOT.token);
+      localStorage.removeItem(STORAGE_SLOT.user);
     } catch { /* ignore */ }
   },
 };

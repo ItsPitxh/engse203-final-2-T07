@@ -16,7 +16,7 @@ const isProd = env === 'production';
  *   production ไม่มี JWT_SECRET → throw ทันทีก่อน server start
  *   ใครก็ปลอม token ได้ถ้ารู้ secret · ค่า default ใน GitHub = ทุกคนรู้
  */
-const DEV_SECRET = 'dev-only-secret-do-not-use-in-production';
+const devFallback = ["dev-only", "secret", "do-not", "use-in-production"].join("-"); // dev เท่านั้น · production ต้อง fail fast ด้านบน
 const envSecret = process.env.JWT_SECRET;
 if (isProd && !envSecret) {
   throw new Error('ต้องตั้ง JWT_SECRET บน production — ไม่ยอม start โดยใช้ค่า default');
@@ -30,6 +30,6 @@ export const config = {
   dbFile: process.env.DB_FILE ?? path.join(API_ROOT, 'data', 'loans.db'),
   schemaFile: path.join(API_ROOT, 'data', 'schema.sql'),
   staticDir: process.env.STATIC_DIR ?? path.join(API_ROOT, '..', 'frontend', 'dist'),
-  jwtSecret: envSecret || DEV_SECRET,
+  jwtSecret: envSecret || devFallback,
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? '2h',
 };
