@@ -39,3 +39,12 @@
 - **สาเหตุ (ไฟล์:บรรทัด):** `api/src/controllers/requestController.js` ใน `updateRequestStatus` มีบรรทัด log `updated.id` อยู่**ก่อน**การตรวจ `if (!updated)` — เมื่อไม่พบคำร้อง `updated` เป็น null จึงพัง
 - **วิธีแก้:** ย้าย log ไปไว้หลังการตรวจ null
 - **test ที่กัน:** `tests/integration/requests.api.test.js` → "คำร้องที่ไม่มีอยู่ → 404 (ไม่ใช่ 500)"
+
+## SECURITY #1 · เคย commit `.env.production` ลงประวัติ git (checker ข้อ D3 แจ้ง)
+
+- **อาการ:** `check-project.mjs` ข้อ D3 แจ้งว่าเคย commit `starter/frontend/.env.production` ไว้ในประวัติ
+- **วิธีทำซ้ำ:** `git log --all --oneline -- starter/frontend/.env.production`
+- **เครื่องมือ:** `git log` หา commit ที่เกี่ยวข้อง แล้ว `git show <commit>:<path>` อ่านเนื้อหา · ค้นชื่อตัวแปรที่เหมือนความลับ (secret / password / token / key) ตรวจเมื่อ 2026-10-21
+- **สาเหตุ (ไฟล์:บรรทัด):** `starter/frontend/.env.production` ถูกคัดลอกมากับโค้ดเริ่มต้นของ LAB 13 แล้วถูก `git add` เข้ามา · ไฟล์มีตัวแปร: VITE_API_BASE_URL
+- **วิธีแก้:** ตรวจแล้ว**ไม่มีตัวแปรที่เป็นความลับ** (มีแต่ที่อยู่สาธารณะของ API ซึ่งเบราว์เซอร์เห็นได้อยู่แล้ว) จึงไม่ต้องเปลี่ยน secret · ย้ายโค้ดขึ้น root ทำให้ path `starter/` หายไปจากโฟลเดอร์ทำงาน · `.gitignore` มี `.env` และ `.env.local` · `api/.env.example` มี `JWT_SECRET=` ค่าว่าง · `JWT_SECRET` และรหัส staff production อยู่ใน environment ของ Render เท่านั้น
+- **test ที่กัน:** `check-project.mjs` ข้อ D3 · และคำสั่ง `git ls-files | Select-String '\.env$'` ต้องเจอแค่ `.env.example`
