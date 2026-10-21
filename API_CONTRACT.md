@@ -1,226 +1,100 @@
-# API Contract — Campus Service Request API
+# API Contract — T07 ยืม-คืนอุปกรณ์ชมรม
 
-**เวอร์ชัน:** 2.0.0 · **Base URL:** `http://localhost:3001`
-**รูปแบบข้อมูล:** JSON (`Content-Type: application/json`)
-
-> **API Contract คืออะไร** — ข้อตกลงระหว่างคนทำ front-end กับคนทำ back-end
-> ว่าจะคุยกันด้วย endpoint อะไร ส่งอะไรไป ได้อะไรกลับ
-> มีไว้เพื่อให้สองฝั่ง**ทำงานคู่ขนานกันได้** โดยไม่ต้องรอกัน
+**เวอร์ชัน:** 1.0.0 · **Base URL (dev):** `http://localhost:3001` · **Base URL (prod):** `https://engse203-final-2-t07.onrender.com`
+**รูปแบบข้อมูล:** JSON (`Content-Type: application/json`) · UTF-8
+**ความปลอดภัย:** JWT (ใช้ `Authorization: Bearer <token>` สำหรับ endpoint ที่ต้อง login)
 
 ---
 
-## โครงสร้างข้อมูล Request
+## Health
 
-| field | ชนิด | คำอธิบาย | ตัวอย่าง |
-|---|---|---|---|
-| `id` | string | รหัสคำร้อง · ขึ้นต้นด้วย `REQ-` · เซิร์ฟเวอร์สร้างให้ | `"REQ-001"` |
-| `requesterName` | string | ชื่อผู้แจ้ง · อย่างน้อย 2 ตัวอักษร | `"สมชาย ใจดี"` |
-| `requestType` | string | ประเภท · 1 ใน 4 ค่าที่กำหนด | `"แจ้งซ่อม"` |
-| `location` | string | สถานที่ · ห้ามว่าง | `"ห้องปฏิบัติการ 301"` |
-| `details` | string | รายละเอียด · อย่างน้อย 10 ตัวอักษร | `"เครื่องปรับอากาศไม่ทำงาน"` |
-| `priority` | string | `"normal"` หรือ `"urgent"` | `"urgent"` |
-| `status` | string | `"pending"` · `"in-progress"` · `"completed"` | `"pending"` |
+### `GET /api/health`
+- **สิทธิ์:** ทุกคน
+- **200:** `{ "ok": true, "db": { "connected": true, "driver": "sqlite", "tables": 3 } }`
 
-**ค่าที่ยอมรับของ `requestType`** — `แจ้งซ่อม` · `บริการบัญชีผู้ใช้` · `ขอใช้อุปกรณ์` · `อื่น ๆ`
+## Auth
 
----
+### `POST /api/auth/login`
+- **สิทธิ์:** ทุกคน · **Body:** `{ "email": "...", "password": "..." }`
+- **200:** `{ "token": "<JWT>", "user": { "id": 5, "name": "...", "email": "...", "role": "staff" } }`
+- **401:** `{ "error": "อีเมลหรือรหัสผ่านไม่ถูกต้อง" }` (ข้อความเดียวกันทั้งอีเมลผิดและรหัสผิด)
+- **429:** เดา 5 ครั้งใน 15 นาที
 
-## Endpoints
+## Loans
 
-| Method | Endpoint | คำอธิบาย | Request body | สำเร็จ | ผิดพลาด |
-|---|---|---|---|---|---|
-| `GET` | `/api/requests` | ดูคำร้องทั้งหมด | — | `200` + array | — |
-| `GET` | `/api/requests?status=` | กรองตามสถานะ | — | `200` + array | — |
-| `GET` | `/api/requests/:id` | ดูคำร้องใบเดียว | — | `200` + object | `404` ไม่พบ |
-| `POST` | `/api/requests` | สร้างคำร้องใหม่ | Request (ไม่ต้องมี `id`, `status`) | `201` + object ที่สร้าง | `400` ข้อมูลไม่ถูกต้อง |
-| `PUT` | `/api/requests/:id` | เปลี่ยนสถานะ | `{ "status": "..." }` | `200` + object ที่แก้แล้ว | `400` สถานะผิด · `404` ไม่พบ |
-| `DELETE` | `/api/requests/:id` | ลบคำร้อง | — | `204` ไม่มี body | `404` ไม่พบ |
+### `GET /api/loans`
+- **สิทธิ์:** ทุกคน
+- **Query (optional):** `?status=requested|borrowed|returned|overdue` · `?q=<คำค้น>`
+- **200:** array ของ loan ที่ JOIN กับ equipment + users แล้ว
+  ```json
+  [{
+    "id": "LN-001",
+    "borrowerName": "สมชาย ใจดี",
+    "equipmentId": "EQ-001",
+    "equipmentName": "กล้อง DSLR Canon 90D",
+    "equipmentLocation": "ห้องชมรมถ่ายภาพ · ตู้ A",
+    "quantity": 1,
+    "borrowDate": "2026-10-10",
+    "returnDate": "2026-10-20",
+    "purpose": "ถ่ายภาพกิจกรรมปฐมนิเทศ",
+    "status": "borrowed",
+    "createdAt": "..."
+  }]
+  ```
 
----
+### `GET /api/loans/:id`
+- **สิทธิ์:** ทุกคน
+- **200:** loan object · **404:** `{ "error": "ไม่พบคำขอยืมรหัส LN-999" }`
 
-## ตัวอย่างการเรียกใช้
+### `POST /api/loans`
+- **สิทธิ์:** ทุกคน
+- **Body:** `{ "borrowerName", "equipmentId", "quantity", "borrowDate", "returnDate", "purpose" }`
+- **201:** loan object ที่สร้าง
+- **400:** `{ "error": "ข้อมูลคำขอยืมไม่ถูกต้อง", "details": ["ชื่อผู้ยืมต้องยาว 2–100 ตัวอักษร", "..."] }`
+- **413:** body > 10 KB
 
-### GET /api/requests
+### `PUT /api/loans/:id`
+- **สิทธิ์:** staff (ต้อง login)
+- **Body:** `{ "status": "requested|borrowed|returned|overdue" }`
+- **200:** loan ที่อัปเดต · **400:** สถานะไม่ถูกต้อง · **401:** ไม่มี token · **403:** ไม่ใช่ staff · **404:** ไม่พบ
 
-```http
-GET /api/requests HTTP/1.1
-Host: localhost:3001
-```
+### `DELETE /api/loans/:id`
+- **สิทธิ์:** staff
+- **204:** ลบสำเร็จ · **401/403/404:** เหมือน PUT
 
-```json
-[
-  {
-    "id": "REQ-001",
-    "requesterName": "สมชาย ใจดี",
-    "requestType": "แจ้งซ่อม",
-    "location": "ห้องปฏิบัติการ 301",
-    "details": "เครื่องปรับอากาศไม่ทำงานตั้งแต่เช้า",
-    "priority": "urgent",
-    "status": "pending"
-  }
-]
-```
+## Equipment
 
-### POST /api/requests
+### `GET /api/equipment`
+- **สิทธิ์:** ทุกคน
+- **200:** array ที่มี `availableQty` (คำนวณจาก loans ที่ status requested/borrowed/overdue)
+  ```json
+  [{ "id": "EQ-001", "name": "...", "totalQty": 2, "availableQty": 1, "location": "...", "category": "..." }]
+  ```
 
-```http
-POST /api/requests HTTP/1.1
-Content-Type: application/json
+### `GET /api/equipment/:id`
+- **200/404**
 
-{
-  "requesterName": "สุภาวดี รักเรียน",
-  "requestType": "ขอใช้อุปกรณ์",
-  "location": "ห้องประชุม 2",
-  "details": "ขอยืมโปรเจกเตอร์สำหรับนำเสนอ",
-  "priority": "normal"
-}
-```
+## Users
 
-**201 Created**
+### `GET /api/users`
+- **200:** `[{ "id": 1, "name": "...", "department": "..." }, ...]`
 
-```json
-{
-  "id": "REQ-MTYOA3MX-YEX9",
-  "requesterName": "สุภาวดี รักเรียน",
-  "requestType": "ขอใช้อุปกรณ์",
-  "location": "ห้องประชุม 2",
-  "details": "ขอยืมโปรเจกเตอร์สำหรับนำเสนอ",
-  "priority": "normal",
-  "status": "pending"
-}
-```
-
-**400 Bad Request** — เมื่อข้อมูลไม่ถูกต้อง
-
-```json
-{
-  "error": "ข้อมูลคำร้องไม่ถูกต้อง",
-  "details": [
-    "ชื่อผู้แจ้งต้องมีอย่างน้อย 2 ตัวอักษร",
-    "รายละเอียดต้องมีอย่างน้อย 10 ตัวอักษร"
-  ]
-}
-```
-
-### PUT /api/requests/:id
-
-```http
-PUT /api/requests/REQ-001 HTTP/1.1
-Content-Type: application/json
-
-{ "status": "in-progress" }
-```
-
-**200 OK** — คืนคำร้องที่อัปเดตแล้ว
-
-### DELETE /api/requests/:id
-
-**204 No Content** — ไม่มี body ส่งกลับ
+### `GET /api/users/:id/loans`
+- **200:** `[{ "id": "LN-001", "equipmentName": "...", "status": "..." }, ...]`
 
 ---
 
-## รูปแบบ Error
+## Status codes
 
-ทุก error ตอบเป็น JSON ที่มี field `error` เสมอ
-
-```json
-{ "error": "ข้อความที่ผู้ใช้ทั่วไปอ่านเข้าใจ" }
-```
-
-กรณี validation จะมี `details` เพิ่มมาเป็น array บอกว่าผิดตรงไหนบ้าง
-
-| Status | เมื่อไหร่ | ฝั่งไหนผิด |
-|---|---|---|
-| `400` | ข้อมูลที่ส่งมาไม่ถูกต้อง | ผู้ใช้ |
-| `404` | ไม่พบทรัพยากรที่ขอ | ผู้ใช้ |
-| `500` | โค้ดเซิร์ฟเวอร์ผิดพลาด | เซิร์ฟเวอร์ |
-
-> **ตอน production จะไม่ส่ง stack trace กลับไป** — เปิดเผยโครงสร้างภายในให้คนภายนอกเห็นไม่ได้
-
----
-
-## CORS
-
-API อนุญาตให้เรียกจาก origin ที่กำหนดใน `CORS_ORIGIN` เท่านั้น
-
-```
-Access-Control-Allow-Origin: http://localhost:5173
-```
-
-**ถ้าเรียกจาก origin อื่น** เบราว์เซอร์จะบล็อกก่อนที่โค้ดจะได้เห็น response — จะเห็น error ใน Console ว่าถูกบล็อกโดย CORS policy
-
-> ⚠ CORS เป็นกลไกของ **เบราว์เซอร์** เท่านั้น · Postman และ curl ไม่ถูกบล็อก เพราะไม่ใช่เบราว์เซอร์
-
----
-
-## Environment Variables
-
-### ฝั่ง API (`api/.env`)
-
-| ตัวแปร | ค่าเริ่มต้น | คำอธิบาย |
-|---|---|---|
-| `PORT` | `3001` | พอร์ตที่ API รับคำขอ |
-| `CORS_ORIGIN` | `http://localhost:5173` | origin ที่อนุญาตให้เรียก |
-| `NODE_ENV` | `development` | `production` จะเปลี่ยนรูปแบบ log และซ่อน stack trace |
-
-### ฝั่ง Frontend (`frontend/.env.local`)
-
-| ตัวแปร | ค่าเริ่มต้น | คำอธิบาย |
-|---|---|---|
-| `VITE_API_BASE_URL` | `http://localhost:3001` | ที่อยู่ของ API |
-
-> **ต้องขึ้นต้นด้วย `VITE_`** ไม่งั้น Vite จะไม่ส่งค่าไปให้โค้ดฝั่งเบราว์เซอร์
-> และ**ห้าม commit ไฟล์ `.env`** — ใช้ `.env.example` เป็นตัวอย่างแทน
-
----
-
-## การรันทั้งระบบ
-
-ต้องเปิด **2 terminal** พร้อมกัน
-
-```bash
-# Terminal 1 — API
-cd api && npm run dev          # http://localhost:3001
-
-# Terminal 2 — Frontend
-cd frontend && npm run dev     # http://localhost:5173
-```
-
-**ลำดับสำคัญ** — เปิด API ก่อนเสมอ ไม่งั้น frontend จะขึ้นข้อความว่าติดต่อเซิร์ฟเวอร์ไม่ได้
-
----
-
-## Data Model (เพิ่มใน Week 10)
-
-API เก็บข้อมูลในฐานข้อมูล SQLite (`api/data/campus.db`) แยกเป็น 2 ตาราง
-
-### ตาราง `users`
-
-| คอลัมน์ | ชนิด | ข้อกำหนด |
-|---|---|---|
-| `id` | INTEGER | PRIMARY KEY AUTOINCREMENT |
-| `name` | TEXT | NOT NULL |
-| `department` | TEXT | NOT NULL |
-| `email` | TEXT | NOT NULL UNIQUE |
-
-### ตาราง `requests`
-
-| คอลัมน์ | ชนิด | ข้อกำหนด |
-|---|---|---|
-| `id` | TEXT | PRIMARY KEY (รูปแบบ `REQ-NNN`) |
-| `requester_id` | INTEGER | NOT NULL · FOREIGN KEY → `users(id)` |
-| `request_type` | TEXT | NOT NULL · CHECK 4 ค่า |
-| `location` · `details` | TEXT | NOT NULL |
-| `priority` | TEXT | DEFAULT `'normal'` · CHECK |
-| `status` | TEXT | DEFAULT `'pending'` · CHECK |
-| `created_at` | TEXT | DEFAULT เวลาปัจจุบัน |
-
-### ข้อสังเกตสำคัญ
-
-**โครงสร้างในฐานข้อมูลไม่เหมือนรูปแบบที่ API ส่งออก**
-
-- ฐานข้อมูลเก็บ `requester_id` (ตัวเลข) เพื่อไม่ให้ข้อมูลผู้ใช้ซ้ำ
-- API คืน `requesterName` (ชื่อ) เพราะ frontend ต้องการแบบนั้น
-- **ชั้น service เป็นตัวแปลงระหว่างสองรูปแบบด้วย `JOIN` และ `AS`**
-
-ตอน POST — frontend ส่ง `requesterName` มา · service หา `id` ของชื่อนั้น ถ้ายังไม่มีก็สร้าง user ใหม่ให้ แล้วเก็บ `requester_id` ลงตาราง `requests`
+| Code | ความหมาย |
+|---|---|
+| 200 | สำเร็จ · มีข้อมูลคืน |
+| 201 | สร้างสำเร็จ |
+| 204 | สำเร็จ · ไม่มีข้อมูลคืน (DELETE) |
+| 400 | body ผิด / สถานะผิด / กฎเฉพาะไม่ผ่าน |
+| 401 | ไม่มี token หรือ token ไม่ valid |
+| 403 | มี token แต่ไม่ใช่ staff |
+| 404 | ไม่พบ resource |
+| 413 | body > 10 KB |
+| 429 | login ผิดถี่เกิน |
+| 500 | server error (prod ไม่ส่ง stack trace) |
