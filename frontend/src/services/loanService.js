@@ -1,4 +1,4 @@
-import { apiFetch } from './apiClient.js';
+import { apiFetch, auth } from './apiClient.js';
 
 export function listLoans({ status, q } = {}) {
   const params = new URLSearchParams();
@@ -28,9 +28,18 @@ export function listEquipment() {
   return apiFetch('/api/equipment');
 }
 
-export function login(email, password) {
-  return apiFetch('/api/auth/login', {
+export async function login(email, password) {
+  const result = await apiFetch('/api/auth/login', {
     method: 'POST',
     body: JSON.stringify({ email, password }),
   });
+  // save token ที่ชั้น service — ให้ผู้เรียกไม่ต้องรู้วิธีเก็บ
+  // รองรับทั้ง { token } และ { accessToken } (เผื่อเปลี่ยนรูป API ภายหลัง)
+  const token = result?.token ?? result?.accessToken;
+  if (token) auth.setToken(token);
+  return result;
+}
+
+export function logout() {
+  auth.clearToken();
 }
