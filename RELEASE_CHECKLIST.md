@@ -31,4 +31,4 @@
 
 ## ปล่อยเวอร์ชัน
 
-- [ ] tag `v1.0.0` ชี้ commit เดียวกับที่ deploy อยู่ — `git tag v1.0.0 && git push origin v1.0.0`
+- [x] tag `v1.0.0` ชี้ commit เดียวกับที่ deploy อยู่ — `git tag v1.0.0 && git push origin v1.0.0`
