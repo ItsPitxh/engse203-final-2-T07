@@ -48,3 +48,15 @@
 - **สาเหตุ (ไฟล์:บรรทัด):** `starter/frontend/.env.production` ถูกคัดลอกมากับโค้ดเริ่มต้นของ LAB 13 แล้วถูก `git add` เข้ามา · ไฟล์มีตัวแปร: VITE_API_BASE_URL
 - **วิธีแก้:** ตรวจแล้ว**ไม่มีตัวแปรที่เป็นความลับ** (มีแต่ที่อยู่สาธารณะของ API ซึ่งเบราว์เซอร์เห็นได้อยู่แล้ว) จึงไม่ต้องเปลี่ยน secret · ย้ายโค้ดขึ้น root ทำให้ path `starter/` หายไปจากโฟลเดอร์ทำงาน · `.gitignore` มี `.env` และ `.env.local` · `api/.env.example` มี `JWT_SECRET=` ค่าว่าง · `JWT_SECRET` และรหัส staff production อยู่ใน environment ของ Render เท่านั้น
 - **test ที่กัน:** `check-project.mjs` ข้อ D3 · และคำสั่ง `git ls-files | Select-String '\.env$'` ต้องเจอแค่ `.env.example`
+## BUG #3 · `starter/frontend/.env.production` เคย commit (D3)
+
+- **ผู้เจอ / วันที่:** พิชฌ์ · 21 ต.ค. 2026 (ตอน checker ตรวจ D3)
+- **อาการ:** checker รายงาน "เคย commit `starter/frontend/.env.production` ไว้ในประวัติ — เปลี่ยน secret ทันทีแล้วบันทึกใน DEBUG_LOG.md"
+- **วิธีทำซ้ำ:** `git log --all -- "**/.env.production"` เจอ commit `2c63bc3 feat(M1.2): added starter code` · ไฟล์ `starter/frontend/.env.production` ติดเข้าไปตอนที่ย้าย LAB 13 ลง repo ทีม
+- **เครื่องมือ:** `git log --all --diff-filter=A --name-only -- "**/.env.production"` · `git show 2c63bc3:starter/frontend/.env.production`
+- **สาเหตุ (ไฟล์:บรรทัด):** `.gitignore` ตอน M1.2 ยังไม่ครอบคลุม `starter/frontend/.env.production` · ไฟล์ติดเข้า commit · ของจริงมีค่า `VITE_API_BASE_URL=` ว่าง (ไม่ใช่ secret) แต่กฎรัดกุม: ไฟล์ `.env.*` ยกเว้น `.env.example` ไม่ควรอยู่ใน git เลย
+- **วิธีแก้:** 
+  1. `starter/` ถูกลบไปแล้วตอน M1.3 · ไฟล์ไม่อยู่บน `main` ปัจจุบัน
+  2. **หมุน `JWT_SECRET` บน Render ทันที** — Render Dashboard → service → Environment → `JWT_SECRET` → Edit → ลบของเดิม → ปล่อยให้ `generateValue: true` ใน `render.yaml` สุ่มใหม่ตอน redeploy
+  3. `.gitignore` และ `api/.gitignore` ยืนยันว่ามี `.env` และ `.env.local` ครอบคลุม `.env.production` แล้ว
+- **test ที่กัน:** pre-commit guard: `git ls-files | grep -E '\.env\.(production|development|local)$'` ต้องว่าง · ทีมเช็คก่อน push ทุกครั้ง

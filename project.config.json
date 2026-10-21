@@ -1,73 +1,73 @@
 {
-    "team":  "T-07",
-    "section":  2,
-    "topic":  "T07",
-    "members":  [
-                    {
-                        "name":  "ชื่อ นามสกุล",
-                        "studentId":  "6xxxxxxxxxx-x",
-                        "github":  "github-username",
-                        "role":  "fe"
-                    },
-                    {
-                        "name":  "ชื่อ นามสกุล",
-                        "studentId":  "6xxxxxxxxxx-x",
-                        "github":  "github-username",
-                        "role":  "be+devops"
-                    }
-                ],
-    "api":  {
-                "resource":  "/api/loans",
-                "existingId":  "LN-001",
-                "statusField":  "status",
-                "statusFilter":  "requested",
-                "statusUpdate":  {
-                                     "status":  "borrowed"
-                                 },
-                "validSample":  {
-                                    "borrowerName":  "ทดสอบ ระบบ",
-                                    "equipmentId":  "EQ-002",
-                                    "quantity":  1,
-                                    "borrowDate":  "{{today}}",
-                                    "returnDate":  "{{today+7}}",
-                                    "purpose":  "ทดสอบระบบยืมคืนอุปกรณ์"
-                                },
-                "invalidSample":  {
-                                      "borrowerName":  "ทดสอบ ระบบ",
-                                      "equipmentId":  "EQ-002",
-                                      "quantity":  1,
-                                      "borrowDate":  "{{today}}",
-                                      "returnDate":  "{{today+30}}",
-                                      "purpose":  "ทดสอบ"
-                                  },
-                "ruleSamples":  [
-                                    {
-                                        "rule":  "ยืมเกิน 14 วัน",
-                                        "body":  {
-                                                     "borrowerName":  "ทดสอบ ระบบ",
-                                                     "equipmentId":  "EQ-002",
-                                                     "quantity":  1,
-                                                     "borrowDate":  "{{today}}",
-                                                     "returnDate":  "{{today+20}}",
-                                                     "purpose":  "ทดสอบระบบ"
-                                                 }
-                                    },
-                                    {
-                                        "rule":  "จำนวนเกินที่มี",
-                                        "body":  {
-                                                     "borrowerName":  "ทดสอบ ระบบ",
-                                                     "equipmentId":  "EQ-002",
-                                                     "quantity":  999,
-                                                     "borrowDate":  "{{today}}",
-                                                     "returnDate":  "{{today+7}}",
-                                                     "purpose":  "ทดสอบระบบยืมคืน"
-                                                 }
-                                    }
-                                ]
-            },
-    "devStaff":  {
-                     "email":  "staff@rmutl.ac.th",
-                     "password":  "staff1234"
-                 },
-    "deployUrl":  "https://engse203-final-1-t07.onrender.com"
+  "team": "T-07",
+  "section": 2,
+  "topic": "T07",
+  "members": [
+    {
+      "name": "วรสิทธิ์ บุญยปรีดี",
+      "studentId": "68543210017-8",
+      "github": "ThunderXD",
+      "role": "fe"
+    },
+    {
+      "name": "พิชฌ์ สินธรสวัสดิ์",
+      "studentId": "67543210061-7",
+      "github": "ItsPitxh",
+      "role": "be+devops"
+    }
+  ],
+  "api": {
+    "resource": "/api/loans",
+    "existingId": "LN-001",
+    "statusField": "status",
+    "statusFilter": "requested",
+    "statusUpdate": {
+      "status": "borrowed"
+    },
+    "validSample": {
+      "borrowerName": "ทดสอบ ระบบ",
+      "equipmentId": "EQ-002",
+      "quantity": 1,
+      "borrowDate": "{{today}}",
+      "returnDate": "{{today+7}}",
+      "purpose": "ทดสอบระบบยืมคืนอุปกรณ์"
+    },
+    "invalidSample": {
+      "borrowerName": "ทดสอบ ระบบ",
+      "equipmentId": "EQ-002",
+      "quantity": 1,
+      "borrowDate": "{{today}}",
+      "returnDate": "{{today+30}}",
+      "purpose": "ทดสอบ"
+    },
+    "ruleSamples": [
+      {
+        "rule": "ยืมเกิน 14 วัน",
+        "body": {
+          "borrowerName": "ทดสอบ ระบบ",
+          "equipmentId": "EQ-002",
+          "quantity": 1,
+          "borrowDate": "{{today}}",
+          "returnDate": "{{today+20}}",
+          "purpose": "ทดสอบระบบ"
+        }
+      },
+      {
+        "rule": "จำนวนเกินที่มี",
+        "body": {
+          "borrowerName": "ทดสอบ ระบบ",
+          "equipmentId": "EQ-002",
+          "quantity": 999,
+          "borrowDate": "{{today}}",
+          "returnDate": "{{today+7}}",
+          "purpose": "ทดสอบระบบยืมคืน"
+        }
+      }
+    ]
+  },
+  "devStaff": {
+    "email": "staff@rmutl.ac.th",
+    "password": "staff1234"
+  },
+  "deployUrl": "https://engse203-final-2-t07.onrender.com"
 }
