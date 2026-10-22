@@ -12,8 +12,8 @@
 | ชื่อทีม | <ชื่อทีม> |
 | Section | 2 |
 | แบบ | คู่ |
-| repo | https://github.com/ItsPitxh/engse203-final-2-T-07.git |
-| repo take-home | [https://github.com/ItsPitxh/engse203-takehome-2-T-07.git](https://github.com/ItsPitxh/engse203-final-takehome-2-T07.git) |
+| repo | https://github.com/ItsPitxh/engse203-final-2-T07.git |
+| repo take-home | [https://github.com/ItsPitxh/engse203-takehome-2-T07.git](https://github.com/ItsPitxh/engse203-final-takehome-2-T07.git) |
 
 ## สมาชิก
 
