@@ -9,7 +9,7 @@
 
 | | |
 |---|---|
-| ชื่อทีม | <ชื่อทีม> |
+| ชื่อทีม | DontThink.move |
 | Section | 2 |
 | แบบ | คู่ |
 | repo | https://github.com/ItsPitxh/engse203-final-2-T07.git |
