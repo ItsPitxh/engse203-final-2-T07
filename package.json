@@ -1,5 +1,5 @@
 {
-  "name": "engse203-final-2-t07",
+  "name": "engse203-final-2-T07"
   "private": true,
   "scripts": {
     "build": "npm install --include=dev --prefix frontend && npm run build --prefix frontend && npm install --prefix api",
