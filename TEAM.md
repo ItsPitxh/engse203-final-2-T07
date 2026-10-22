@@ -1,4 +1,4 @@
-# ทีม <ชื่อทีม> — ENGSE203 Final Term Project
+# ทีม DontThink.move — ENGSE203 Final Term Project
 
 > **M0 · จับคู่ + เลือกหัวข้อ** — กรอกไฟล์นี้ที่ root ของ repo ทีม แล้วส่งลิงก์ repo ใน LMS (ทีมละ 1 ครั้ง)
 > กำหนด: **Section 1 ภายใน จ. 5 ต.ค. 23:59** · **Section 2 ภายใน พฤ. 8 ต.ค. 23:59**
@@ -13,7 +13,7 @@
 | Section | 2 |
 | แบบ | คู่ |
 | repo | https://github.com/ItsPitxh/engse203-final-2-T-07.git |
-| repo take-home | https://github.com/ItsPitxh/engse203-takehome-2-T-07.git |
+| repo take-home | [https://github.com/ItsPitxh/engse203-takehome-2-T-07.git](https://github.com/ItsPitxh/engse203-final-takehome-2-T07.git) |
 
 ## สมาชิก
 
